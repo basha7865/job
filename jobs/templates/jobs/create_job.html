@@ -1,0 +1,83 @@
+{% extends 'jobs/base.html' %}
+
+{% block title %}{{ action_name }} Job Posting | JobPortal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8">
+        <div class="card p-4 shadow-sm border-0">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 p-3 text-primary">
+                        <i class="fa-solid fa-file-pen fa-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1">{{ action_name }} Job Posting</h3>
+                        <p class="text-muted small mb-0">Fill out the fields below to publish a job opening.</p>
+                    </div>
+                </div>
+
+                <form method="POST" class="needs-validation" novalidate>
+                    {% csrf_token %}
+                    
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger shadow-sm">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        {% for field in form %}
+                            <div class="{% if field.name == 'description' %}col-12{% else %}col-md-6{% endif %}">
+                                <label for="{{ field.id_for_label }}" class="form-label fw-semibold small text-secondary">{{ field.label }}</label>
+                                {{ field.errors }}
+                                
+                                {% if field.name == 'job_type' %}
+                                    <select name="job_type" id="id_job_type" class="form-select py-2 {% if field.errors %}is-invalid{% endif %}" required>
+                                        {% for choice in field.field.choices %}
+                                            <option value="{{ choice.0 }}" {% if choice.0 == field.value %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endfor %}
+                                    </select>
+                                {% elif field.name == 'description' %}
+                                    <textarea 
+                                        name="description" 
+                                        id="id_description" 
+                                        cols="40" 
+                                        rows="6" 
+                                        class="form-control {% if field.errors %}is-invalid{% endif %}" 
+                                        placeholder="Provide job description and requirements..." 
+                                        required
+                                    >{{ field.value|default:'' }}</textarea>
+                                {% else %}
+                                    <input 
+                                        type="text" 
+                                        name="{{ field.html_name }}" 
+                                        id="{{ field.id_for_label }}"
+                                        class="form-control {% if field.errors %}is-invalid{% endif %} py-2"
+                                        placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                        value="{{ field.value|default:'' }}"
+                                        required
+                                    >
+                                {% endif %}
+                                
+                                {% if field.help_text %}
+                                    <div class="form-text small text-muted">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-flex gap-3 justify-content-end mt-4 pt-3 border-top">
+                        <a href="{% if action_name == 'Edit' %}{% url 'job_detail' form.instance.id %}{% else %}{% url 'job_list' %}{% endif %}" class="btn btn-outline-secondary px-4 py-2 fw-semibold">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-circle-check me-1"></i> Save Posting
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'jobs/base.html' %}
+
+{% block title %}Browse Jobs | JobPortal{% endblock %}
+
+{% block content %}
+<!-- Hero Search Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card bg-dark text-white border-0 shadow-lg overflow-hidden position-relative" style="background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);">
+            <div class="card-body p-5 text-center my-4 position-relative z-1">
+                <h1 class="display-5 fw-bold mb-3">Find Your Dream Job Today</h1>
+                <p class="lead text-white-50 mb-4">Discover thousands of career opportunities matching your skillset.</p>
+                
+                <!-- Search Form -->
+                <form method="GET" action="{% url 'job_list' %}" class="row g-2 justify-content-center max-w-lg mx-auto bg-white p-3 rounded-4 shadow-lg text-dark">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="fa-solid fa-search"></i></span>
+                            <input type="text" name="q" class="form-control border-0 px-2" placeholder="Keywords, title, company..." value="{{ query }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 border-start border-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="fa-solid fa-location-dot"></i></span>
+                            <input type="text" name="loc" class="form-control border-0 px-2" placeholder="Location..." value="{{ location }}">
+                        </div>
+                    </div>
+                    <div class="col-md-3 border-start border-md-0">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-0 text-muted"><i class="fa-solid fa-briefcase"></i></span>
+                            <select name="type" class="form-select border-0 px-2 text-muted">
+                                <option value="">Job Type</option>
+                                <option value="Full-Time" {% if job_type == 'Full-Time' %}selected{% endif %}>Full-Time</option>
+                                <option value="Part-Time" {% if job_type == 'Part-Time' %}selected{% endif %}>Part-Time</option>
+                                <option value="Remote" {% if job_type == 'Remote' %}selected{% endif %}>Remote</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">Search</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Decorative backdrop elements -->
+            <div class="position-absolute top-0 start-0 w-100 h-100 opacity-10 bg-grid-white" style="pointer-events: none;"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Job Listings Layout -->
+<div class="row">
+    <!-- Filters Summary and Total count -->
+    <div class="col-12 mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-0">Latest Job Openings</h4>
+            <p class="text-muted small mb-0">Showing {{ jobs|length }} job postings</p>
+        </div>
+        {% if query or location or job_type %}
+            <div>
+                <a href="{% url 'job_list' %}" class="btn btn-sm btn-outline-secondary rounded-pill">
+                    Clear Filters <i class="fa-solid fa-xmark ms-1"></i>
+                </a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- Job Cards -->
+    <div class="col-12">
+        {% if jobs %}
+            <div class="row g-4">
+                {% for job in jobs %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 card-hover border-0 shadow-sm">
+                            <div class="card-body p-4 d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <span class="badge rounded-pill bg-light text-primary mb-2 fw-bold">{{ job.job_type }}</span>
+                                    </div>
+                                    <span class="text-muted small"><i class="fa-regular fa-clock me-1"></i>{{ job.created_at|date:"M d, Y" }}</span>
+                                </div>
+                                
+                                <h5 class="card-title fw-bold mb-1">
+                                    <a href="{% url 'job_detail' job.id %}" class="text-decoration-none text-dark hover-primary">{{ job.title }}</a>
+                                </h5>
+                                <p class="text-primary fw-semibold small mb-3"><i class="fa-solid fa-building me-1"></i>{{ job.company_name }}</p>
+                                
+                                <p class="card-text text-muted small mb-4 flex-grow-1">
+                                    {{ job.description|truncatewords:20 }}
+                                </p>
+                                
+                                <div class="border-top pt-3 d-flex justify-content-between align-items-center mt-auto">
+                                    <div class="small text-muted">
+                                        <i class="fa-solid fa-location-dot text-danger me-1"></i>{{ job.location }}
+                                    </div>
+                                    <div class="fw-bold text-success small">
+                                        <i class="fa-solid fa-money-bill-wave me-1"></i>{{ job.salary_range }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent border-0 px-4 pb-4 pt-0">
+                                <a href="{% url 'job_detail' job.id %}" class="btn btn-outline-primary btn-sm w-100 fw-semibold">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card text-center p-5 border-0 shadow-sm">
+                <div class="card-body my-4">
+                    <div class="text-muted mb-4"><i class="fa-solid fa-folder-open fa-3x"></i></div>
+                    <h5 class="fw-bold">No Jobs Found</h5>
+                    <p class="text-muted small">We couldn't find any jobs matching your search criteria. Try modifying your search keywords or location filters.</p>
+                    <a href="{% url 'job_list' %}" class="btn btn-primary mt-2">Reset Search</a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

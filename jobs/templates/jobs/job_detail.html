@@ -1,0 +1,113 @@
+{% extends 'jobs/base.html' %}
+
+{% block title %}{{ job.title }} | JobPortal{% endblock %}
+
+{% block content %}
+<div class="row g-4 my-4">
+    <!-- Main job details card -->
+    <div class="col-lg-8">
+        <div class="card p-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div>
+                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary mb-2 fw-bold px-3 py-2">{{ job.job_type }}</span>
+                        <h2 class="fw-bold mb-1">{{ job.title }}</h2>
+                        <h5 class="text-secondary fw-medium mb-3"><i class="fa-solid fa-building me-1"></i>{{ job.company_name }}</h5>
+                    </div>
+                    <span class="text-muted small"><i class="fa-regular fa-clock me-1"></i>Posted on {{ job.created_at|date:"M d, Y" }}</span>
+                </div>
+
+                <div class="row g-3 my-3 p-3 bg-light rounded-3">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 small">
+                            <i class="fa-solid fa-location-dot text-danger"></i>
+                            <div>
+                                <span class="text-muted d-block">Location</span>
+                                <strong class="text-dark">{{ job.location }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center gap-2 small">
+                            <i class="fa-solid fa-money-bill-wave text-success"></i>
+                            <div>
+                                <span class="text-muted d-block">Salary Range</span>
+                                <strong class="text-dark">{{ job.salary_range }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="my-4">
+                    <h5 class="fw-bold mb-3">Job Description</h5>
+                    <div class="text-muted leading-relaxed" style="white-space: pre-line;">
+                        {{ job.description }}
+                    </div>
+                </div>
+
+                <hr class="my-4 border-light">
+
+                <!-- Action section -->
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary btn-md fw-semibold"><i class="fa-solid fa-arrow-left me-1"></i> Back to Jobs</a>
+                    
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'SEEKER' %}
+                            {% if already_applied %}
+                                <button class="btn btn-success btn-md fw-semibold px-4" disabled>
+                                    <i class="fa-solid fa-check-double me-1"></i> Applied
+                                </button>
+                            {% else %}
+                                <a href="{% url 'apply_job' job.id %}" class="btn btn-primary btn-md fw-semibold px-4">
+                                    Apply Now <i class="fa-solid fa-paper-plane ms-1"></i>
+                                </a>
+                            {% endif %}
+                        {% elif user.role == 'EMPLOYER' and job.employer == user %}
+                            <div class="d-flex gap-2">
+                                <a href="{% url 'edit_job' job.id %}" class="btn btn-outline-primary fw-semibold"><i class="fa-solid fa-edit me-1"></i> Edit</a>
+                                <a href="{% url 'delete_job' job.id %}" class="btn btn-outline-danger fw-semibold"><i class="fa-solid fa-trash me-1"></i> Delete</a>
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-primary btn-md fw-semibold px-4">
+                            Log In to Apply <i class="fa-solid fa-right-to-bracket ms-1"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar details -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3">Company Details</h5>
+                {% if job.employer.profile.company_name %}
+                    <p class="fw-bold mb-1">{{ job.employer.profile.company_name }}</p>
+                {% else %}
+                    <p class="fw-bold mb-1">{{ job.company_name }}</p>
+                {% endif %}
+                
+                {% if job.employer.profile.company_description %}
+                    <p class="small text-muted mb-0">{{ job.employer.profile.company_description|truncatewords:40 }}</p>
+                {% else %}
+                    <p class="small text-muted mb-0">No company details provided.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card border-0 shadow-sm bg-primary bg-opacity-10">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-2">Job Overview</h5>
+                <ul class="list-unstyled small mb-0">
+                    <li class="mb-2"><span class="text-muted">Job Type:</span> <strong class="float-end">{{ job.job_type }}</strong></li>
+                    <li class="mb-2"><span class="text-muted">Location:</span> <strong class="float-end">{{ job.location }}</strong></li>
+                    <li class="mb-2"><span class="text-muted">Salary:</span> <strong class="float-end">{{ job.salary_range }}</strong></li>
+                    <li><span class="text-muted">Posted:</span> <strong class="float-end">{{ job.created_at|date:"M d, Y" }}</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

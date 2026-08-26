@@ -1,0 +1,104 @@
+{% extends 'jobs/base.html' %}
+
+{% block title %}My Profile | JobPortal{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center my-4">
+    <div class="col-lg-8">
+        <div class="card p-4 shadow-sm border-0">
+            <div class="card-body">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 p-3 text-primary">
+                        <i class="fa-solid fa-address-card fa-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="fw-bold mb-1">Manage Profile</h3>
+                        <p class="text-muted small mb-0">Update your public profile details and documents.</p>
+                    </div>
+                </div>
+
+                <div class="bg-light p-3 rounded-3 mb-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small d-block">Account Username</span>
+                        <strong class="text-dark">{{ user.username }}</strong>
+                    </div>
+                    <div>
+                        <span class="text-muted small d-block text-end">User Role</span>
+                        {% if user.role == 'EMPLOYER' %}
+                            <span class="badge badge-employer">Employer</span>
+                        {% else %}
+                            <span class="badge badge-seeker">Job Seeker</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Form -->
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger shadow-sm">
+                            {% for error in form.non_field_errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-4">
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold small text-secondary">{{ field.label }}</label>
+                            {{ field.errors }}
+
+                            {% if field.name == 'resume' %}
+                                <!-- File Upload Custom Layout -->
+                                <div class="input-group">
+                                    <input 
+                                        type="file" 
+                                        name="resume" 
+                                        id="id_resume" 
+                                        class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                    >
+                                </div>
+                                {% if field.value %}
+                                    <div class="form-text text-success mt-2 small">
+                                        <i class="fa-solid fa-file-pdf me-1"></i> Current resume: 
+                                        <a href="{{ field.value.url }}" class="fw-bold text-success text-decoration-none" target="_blank">Download Resume</a>
+                                    </div>
+                                {% else %}
+                                    <div class="form-text small text-muted">Upload resume file in PDF, DOC, or DOCX format.</div>
+                                {% endif %}
+
+                            {% elif field.name == 'bio' or field.name == 'company_description' %}
+                                <textarea 
+                                    name="{{ field.html_name }}" 
+                                    id="{{ field.id_for_label }}" 
+                                    cols="40" 
+                                    rows="5" 
+                                    class="form-control {% if field.errors %}is-invalid{% endif %}"
+                                    placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                >{{ field.value|default:'' }}</textarea>
+
+                            {% else %}
+                                <input 
+                                    type="text" 
+                                    name="{{ field.html_name }}" 
+                                    id="{{ field.id_for_label }}" 
+                                    value="{{ field.value|default:'' }}" 
+                                    class="form-control {% if field.errors %}is-invalid{% endif %} py-2"
+                                    placeholder="{{ field.field.widget.attrs.placeholder }}"
+                                >
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-flex justify-content-end gap-3 mt-4 pt-3 border-top">
+                        <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+                            <i class="fa-solid fa-circle-check me-1"></i> Save Profile Details
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

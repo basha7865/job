@@ -1,0 +1,160 @@
+{% extends 'jobs/base.html' %}
+
+{% block title %}Employer Dashboard | JobPortal{% endblock %}
+
+{% block content %}
+<div class="row my-4">
+    <div class="col-12">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">Employer Dashboard</h2>
+                <p class="text-muted small mb-0">Manage your job postings and review candidate applications.</p>
+            </div>
+            <div>
+                <a href="{% url 'create_job' %}" class="btn btn-primary fw-semibold"><i class="fa-solid fa-plus me-1"></i> Post a New Job</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs -->
+<div class="row">
+    <div class="col-12">
+        <ul class="nav nav-tabs border-bottom mb-4" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active fw-bold text-dark" id="jobs-tab" data-bs-toggle="tab" data-bs-target="#jobs" type="button" role="tab" aria-controls="jobs" aria-selected="true">
+                    <i class="fa-solid fa-folder me-2 text-primary"></i>My Job Postings ({{ jobs|length }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link fw-bold text-dark" id="applicants-tab" data-bs-toggle="tab" data-bs-target="#applicants" type="button" role="tab" aria-controls="applicants" aria-selected="false">
+                    <i class="fa-solid fa-users-rectangle me-2 text-warning"></i>Applications ({{ applications|length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="dashboardTabsContent">
+            <!-- Jobs postings tab -->
+            <div class="tab-pane fade show active" id="jobs" role="tabpanel" aria-labelledby="jobs-tab">
+                {% if jobs %}
+                    <div class="table-responsive bg-white rounded-3 shadow-sm border border-light">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Job Title</th>
+                                    <th scope="col" class="py-3">Location</th>
+                                    <th scope="col" class="py-3">Type</th>
+                                    <th scope="col" class="py-3">Posted Date</th>
+                                    <th scope="col" class="py-3 text-center">Applicants</th>
+                                    <th scope="col" class="px-4 py-3 text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs %}
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <a href="{% url 'job_detail' job.id %}" class="fw-bold text-dark text-decoration-none">{{ job.title }}</a>
+                                        </td>
+                                        <td class="py-3 text-muted">{{ job.location }}</td>
+                                        <td class="py-3"><span class="badge rounded-pill bg-light text-primary">{{ job.job_type }}</span></td>
+                                        <td class="py-3 text-muted">{{ job.created_at|date:"M d, Y" }}</td>
+                                        <td class="py-3 text-center fw-bold text-primary">{{ job.applications.count }}</td>
+                                        <td class="px-4 py-3 text-end">
+                                            <div class="d-inline-flex gap-2">
+                                                <a href="{% url 'job_detail' job.id %}" class="btn btn-sm btn-outline-secondary" title="View Details"><i class="fa-solid fa-eye"></i></a>
+                                                <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-outline-primary" title="Edit Posting"><i class="fa-solid fa-edit"></i></a>
+                                                <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-outline-danger" title="Delete Posting"><i class="fa-solid fa-trash"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="card text-center p-5 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-muted mb-3"><i class="fa-solid fa-folder-plus fa-3x"></i></div>
+                            <h5 class="fw-bold">No Active Job Postings</h5>
+                            <p class="text-muted small">You haven't posted any jobs yet. Create one to start attracting applications.</p>
+                            <a href="{% url 'create_job' %}" class="btn btn-primary mt-2">Post a Job</a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Applicants list tab -->
+            <div class="tab-pane fade" id="applicants" role="tabpanel" aria-labelledby="applicants-tab">
+                {% if applications %}
+                    <div class="table-responsive bg-white rounded-3 shadow-sm border border-light">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th scope="col" class="px-4 py-3">Applicant Name</th>
+                                    <th scope="col" class="py-3">Applied Job</th>
+                                    <th scope="col" class="py-3">Resume</th>
+                                    <th scope="col" class="py-3">Applied Date</th>
+                                    <th scope="col" class="py-3">Current Status</th>
+                                    <th scope="col" class="px-4 py-3 text-end">Update Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for app in applications %}
+                                    <tr>
+                                        <td class="px-4 py-3">
+                                            <div class="fw-bold">{{ app.applicant.username }}</div>
+                                            <span class="text-muted small">{{ app.applicant.email }}</span>
+                                        </td>
+                                        <td class="py-3">
+                                            <a href="{% url 'job_detail' app.job.id %}" class="text-decoration-none text-dark fw-semibold">{{ app.job.title }}</a>
+                                        </td>
+                                        <td class="py-3">
+                                            {% if app.applicant.profile.resume %}
+                                                <a href="{{ app.applicant.profile.resume.url }}" class="btn btn-sm btn-light border text-primary fw-semibold" target="_blank">
+                                                    <i class="fa-solid fa-file-pdf me-1"></i> View Resume
+                                                </a>
+                                            {% else %}
+                                                <span class="text-muted small">No Resume</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="py-3 text-muted">{{ app.applied_at|date:"M d, Y" }}</td>
+                                        <td class="py-3">
+                                            <span class="badge rounded-pill 
+                                                {% if app.status == 'Accepted' %}bg-success
+                                                {% elif app.status == 'Shortlisted' %}bg-info text-dark
+                                                {% elif app.status == 'Rejected' %}bg-danger
+                                                {% else %}bg-warning text-dark{% endif %} px-3 py-2">
+                                                {{ app.status }}
+                                            </span>
+                                        </td>
+                                        <td class="px-4 py-3 text-end">
+                                            <form method="POST" action="{% url 'update_application_status' app.id %}" class="d-inline-flex gap-2">
+                                                {% csrf_token %}
+                                                <select name="status" class="form-select form-select-sm w-auto">
+                                                    <option value="Pending" {% if app.status == 'Pending' %}selected{% endif %}>Pending</option>
+                                                    <option value="Shortlisted" {% if app.status == 'Shortlisted' %}selected{% endif %}>Shortlisted</option>
+                                                    <option value="Accepted" {% if app.status == 'Accepted' %}selected{% endif %}>Accepted</option>
+                                                    <option value="Rejected" {% if app.status == 'Rejected' %}selected{% endif %}>Rejected</option>
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary fw-semibold">Save</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="card text-center p-5 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="text-muted mb-3"><i class="fa-solid fa-users fa-3x"></i></div>
+                            <h5 class="fw-bold">No Applications Yet</h5>
+                            <p class="text-muted small">Candidates will appear here once they apply to your job postings.</p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
